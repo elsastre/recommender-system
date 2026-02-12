@@ -1,27 +1,26 @@
-"""Construcción de modelo de filtrado colaborativo neuronal (NCF)."""
+"""Neural Collaborative Filtering (NCF) model construction."""
 
 import tensorflow as tf
 from tensorflow.keras import layers, models
 
 
 def create_ncf_model(num_users: int, num_movies: int, embedding_size: int = 50) -> models.Model:
-    """Construye y compila un modelo de Filtrado Colaborativo Neuronal (NCF).
+    """Build and compile a Neural Collaborative Filtering (NCF) model.
 
-    El modelo utiliza dos ramas de embedding (usuario y película), las concatena
-    y pasa el vector resultante a través de una serie de capas densas (MLP) para
-    predecir la calificación.
+    The model uses two embedding branches (user and movie), concatenates them,
+    and passes the resulting vector through a small MLP to predict the rating.
 
     Args:
-        num_users (int): Cantidad total de usuarios únicos en el dataset.
-        num_movies (int): Cantidad total de películas únicas en el dataset.
-        embedding_size (int, optional): Dimensión del espacio latente para los
-            embeddings. Por defecto es 50.
+        num_users (int): Total number of unique users in the dataset.
+        num_movies (int): Total number of unique movies in the dataset.
+        embedding_size (int, optional): Dimension of the latent embedding space.
+            Defaults to 50.
 
     Returns:
-        tensorflow.keras.models.Model: Modelo de Keras compilado con optimizador Adam,
-        función de pérdida de error cuadrático medio (MSE) y métrica MAE.
+        tensorflow.keras.models.Model: A compiled Keras model using Adam optimizer,
+        mean squared error (MSE) loss and MAE metric.
     """
-    # Entradas
+    # Inputs
     user_input = layers.Input(shape=(1,), name='user_input')
     movie_input = layers.Input(shape=(1,), name='movie_input')
 
@@ -29,12 +28,12 @@ def create_ncf_model(num_users: int, num_movies: int, embedding_size: int = 50) 
     user_embedding = layers.Embedding(num_users, embedding_size, name='user_emb')(user_input)
     movie_embedding = layers.Embedding(num_movies, embedding_size, name='movie_emb')(movie_input)
 
-    # Flatten y concatenación
+    # Flatten and concatenate
     user_vec = layers.Flatten()(user_embedding)
     movie_vec = layers.Flatten()(movie_embedding)
     concat = layers.Concatenate()([user_vec, movie_vec])
 
-    # Capas densas (MLP)
+    # Dense layers (MLP)
     dense_1 = layers.Dense(64, activation='relu')(concat)
     dense_2 = layers.Dense(32, activation='relu')(dense_1)
     output = layers.Dense(1, activation='sigmoid')(dense_2)

@@ -1,9 +1,9 @@
-# Entorno virtual
+# Virtual environment
 venv/
 env/
 .env/
 
-# Archivos de bytecode de Python
+# Python bytecode files
 __pycache__/
 *.pyc
 
@@ -15,6 +15,6 @@ __pycache__/
 Dockerfile
 docker-compose.yml
 
-# Datos de MovieLens
+# MovieLens data
 data/*.data
 data/*.item

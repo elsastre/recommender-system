@@ -1,26 +1,26 @@
-# Dockerfile para el servicio de recomendación NCF.
-# Construye una imagen con Python 3.12, instala dependencias y ejecuta la API FastAPI.
+# Dockerfile for the NCF recommendation service.
+# Builds an image with Python 3.12, installs dependencies, and runs the FastAPI API.
 
-# Usamos una imagen ligera de Python 3.12
+# Use a lightweight Python 3.12 image
 FROM python:3.12-slim
 
-# Establecemos el directorio de trabajo dentro del contenedor
+# Set the working directory inside the container
 WORKDIR /app
 
-# Instalamos dependencias del sistema necesarias para HDF5 y TensorFlow
+# Install system dependencies required for HDF5 and TensorFlow
 RUN apt-get update && apt-get install -y \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Copiamos primero los requerimientos para aprovechar la caché de capas de Docker
+# Copy requirements first to leverage Docker layer caching
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiamos el resto del código del proyecto
+# Copy the rest of the project code
 COPY . .
 
-# Exponemos el puerto que usa FastAPI
+# Expose the port used by FastAPI
 EXPOSE 8000
 
-# Comando para arrancar la API cuando el contenedor inicie
+# Command to start the API when the container starts
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

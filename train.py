@@ -1,9 +1,9 @@
 """
-Script de entrenamiento para el modelo de Recomendación NCF.
+Training script for the NCF Recommendation model.
 
-Este módulo carga los datos de MovieLens, inicializa la arquitectura de la red
-neuronal, ejecuta el ciclo de entrenamiento y persiste el modelo resultante
-en la carpeta 'models/'.
+This module loads the MovieLens data, initializes the neural network
+architecture, runs the training loop and saves the resulting model into
+the 'models/' folder.
 """
 
 from src.preprocess import DataProcessor
@@ -11,8 +11,8 @@ from src.model import create_ncf_model
 import os
 
 def main():
-    """Ejecuta el pipeline completo de entrenamiento y guardado del modelo."""
-    # 1. Preparación de datos (Pipeline ETL)
+    """Run the full training pipeline and save the trained model."""
+    # 1. Data preparation (ETL pipeline)
     processor = DataProcessor('data/u.data')
     df = processor.load_and_clean()
     X_train, X_test, y_train, y_test = processor.get_train_test(df)
@@ -20,11 +20,11 @@ def main():
     num_users = df['user_idx'].nunique()
     num_movies = df['movie_idx'].nunique()
 
-    # 2. Inicialización de la arquitectura NCF
+    # 2. Initialize the NCF architecture
     model = create_ncf_model(num_users, num_movies)
 
-    # 3. Ciclo de entrenamiento (Optimization process)
-    print("Iniciando entrenamiento...")
+    # 3. Training loop (optimization process)
+    print("Starting training...")
     model.fit(
         [X_train[:, 0], X_train[:, 1]],
         y_train,
@@ -34,12 +34,12 @@ def main():
         verbose=1
     )
 
-    # 4. Persistencia del artefacto (Model Export)
+    # 4. Persist the artifact (model export)
     if not os.path.exists('models'):
         os.makedirs('models')
 
     model.save('models/recommender_v1.h5')
-    print("Modelo guardado exitosamente en models/recommender_v1.h5")
+    print("Model successfully saved to models/recommender_v1.h5")
 
 if __name__ == "__main__":
     main()

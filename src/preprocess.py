@@ -1,68 +1,68 @@
-"""Procesamiento de datos de MovieLens para sistema de recomendación NCF."""
+"""MovieLens data processing for an NCF recommender system."""
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
 
 class DataProcessor:
-    """Encargado del pipeline ETL y preprocesamiento de datos de MovieLens.
+    """Responsible for the ETL pipeline and preprocessing of MovieLens data.
 
-    Carga el dataset de calificaciones, genera índices continuos para usuarios
-    y películas, y prepara los conjuntos de entrenamiento y prueba.
+    Loads the ratings dataset, creates contiguous indices for users and movies,
+    and prepares train/test splits.
 
     Attributes:
-        data_path (str): Ruta local al archivo de calificaciones (u.data).
-        user_map (dict): Mapeo de índices internos a IDs de usuario originales.
-        movie_map (dict): Mapeo de índices internos a IDs de película originales.
+        data_path (str): Local path to the ratings file (u.data).
+        user_map (dict): Mapping from internal indices to original user IDs.
+        movie_map (dict): Mapping from internal indices to original movie IDs.
     """
 
     def __init__(self, data_path: str):
-        """Inicializa el procesador con la ruta de los datos.
+        """Initialize the processor with the data path.
 
         Args:
-            data_path (str): Ruta del archivo u.data de MovieLens.
+            data_path (str): Path to the MovieLens u.data file.
         """
         self.data_path = data_path
         self.user_map = {}
         self.movie_map = {}
 
     def load_and_clean(self) -> pd.DataFrame:
-        """Carga el dataset, realiza limpieza básica y genera mapeos de IDs.
+        """Load the dataset, perform basic cleaning and create ID mappings.
 
-        Lee el archivo tabulado, asigna nombres a las columnas, convierte los
-        identificadores originales a índices numéricos continuos y almacena
-        los mapeos para uso posterior.
+        Reads the tab-separated file, assigns column names, converts original
+        identifiers to continuous numeric indices and stores the mappings for
+        later use.
 
         Returns:
-            pd.DataFrame: DataFrame con las columnas originales y dos nuevas:
-                'user_idx' e 'movie_idx', que contienen los índices internos.
+            pd.DataFrame: DataFrame with the original columns and two new ones:
+                'user_idx' and 'movie_idx' containing internal indices.
         """
         names = ['user_id', 'movie_id', 'rating', 'timestamp']
         df = pd.read_csv(self.data_path, sep='\t', names=names)
 
-        # Generar mapeos para evitar saltos en los índices de la red neuronal
+        # Generate mappings to avoid gaps in neural network indices
         df['user_idx'] = df['user_id'].astype('category').cat.codes
         df['movie_idx'] = df['movie_id'].astype('category').cat.codes
 
-        # Guardar mapeos para inferencia inversa
+        # Save mappings for inverse lookup during inference
         self.user_map = dict(enumerate(df['user_id'].astype('category').cat.categories))
         self.movie_map = dict(enumerate(df['movie_id'].astype('category').cat.categories))
 
         return df
 
     def get_train_test(self, df: pd.DataFrame):
-        """Divide el dataframe en conjuntos de entrenamiento y prueba.
+        """Split the dataframe into training and testing sets.
 
-        Extrae las características (user_idx, movie_idx) y la variable objetivo
-        (rating normalizado). Realiza una partición estratificada simple.
+        Extracts features (user_idx, movie_idx) and the target variable
+        (normalized rating). Performs a simple train/test split.
 
         Args:
-            df (pd.DataFrame): DataFrame procesado por `load_and_clean`.
+            df (pd.DataFrame): DataFrame processed by `load_and_clean`.
 
         Returns:
-            tuple: Contiene (X_train, X_test, y_train, y_test), donde:
-                - X_train, X_test: arreglos con pares [user_idx, movie_idx].
-                - y_train, y_test: arreglos con calificaciones normalizadas en [0,1].
+            tuple: Contains (X_train, X_test, y_train, y_test) where:
+                - X_train, X_test: arrays with pairs [user_idx, movie_idx].
+                - y_train, y_test: arrays with normalized ratings in [0,1].
         """
         X = df[['user_idx', 'movie_idx']].values
         y = (df['rating'].values - 1) / 4.0  # Normalización 0-1
