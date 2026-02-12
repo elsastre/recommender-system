@@ -1,3 +1,6 @@
+# Dockerfile para el servicio de recomendación NCF.
+# Construye una imagen con Python 3.12, instala dependencias y ejecuta la API FastAPI.
+
 # Usamos una imagen ligera de Python 3.12
 FROM python:3.12-slim
 

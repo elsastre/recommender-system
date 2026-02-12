@@ -1,13 +1,18 @@
-# Data Science & ML
-numpy<2.0.0
-pandas
-scikit-learn
-tensorflow
+# --- Core Data Science & ML ---
+numpy==1.26.4
+pandas==2.2.1
+scikit-learn==1.4.1.post1
+tensorflow==2.16.1
 
-# API & Serving
-fastapi
-uvicorn
-python-multipart
+# --- API & Serving ---
+fastapi==0.110.0
+uvicorn==0.27.1
+python-multipart==0.0.9
+pydantic==2.6.3
 
-# Utilities
-h5py
+# --- UI & Requests ---
+streamlit==1.31.1
+requests==2.31.0
+
+# --- Utils ---
+h5py==3.10.0

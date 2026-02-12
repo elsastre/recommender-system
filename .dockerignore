@@ -1,7 +1,20 @@
+# Entorno virtual
 venv/
+env/
+.env/
+
+# Archivos de bytecode de Python
 __pycache__/
+*.pyc
+
+# Git
+.git/
 .gitignore
+
+# Docker
 Dockerfile
-.git
+docker-compose.yml
+
+# Datos de MovieLens
 data/*.data
 data/*.item

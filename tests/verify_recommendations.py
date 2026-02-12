@@ -1,3 +1,11 @@
+"""Validación de recomendaciones: historial del usuario y títulos generados.
+
+Carga los títulos de películas desde u.item y las calificaciones desde u.data.
+Proporciona una función para mostrar las películas mejor puntuadas por un usuario
+junto con las recomendaciones producidas por el sistema, permitiendo verificar
+si las sugerencias son relevantes.
+"""
+
 import pandas as pd
 
 # Cargar títulos de películas
@@ -11,11 +19,20 @@ ratings_cols = ['user_id', 'item_id', 'rating', 'timestamp']
 ratings = pd.read_csv('data/u.data', sep='\t', names=ratings_cols)
 
 def check_logic(user_id, recommended_ids):
+    """Muestra el historial de un usuario y las recomendaciones generadas.
+
+    Imprime en consola las cinco películas con mayor calificación del usuario
+    seguido de las películas recomendadas, empleando los títulos reales.
+
+    Args:
+        user_id (int): Identificador del usuario a evaluar.
+        recommended_ids (list): Lista de IDs de películas recomendadas.
+    """
     print(f"--- HISTORIAL DEL USUARIO {user_id} (Top 5 favoritas) ---")
     user_history = ratings[ratings['user_id'] == user_id].sort_values(by='rating', ascending=False).head(5)
     for _, row in user_history.iterrows():
         print(f"- {movie_titles.get(row['item_id'])} (Rating: {row['rating']})")
-    
+
     print(f"\n--- RECOMENDACIONES GENERADAS ---")
     for mid in recommended_ids:
         print(f"-> {movie_titles.get(mid)}")

@@ -1,31 +1,45 @@
-import tensorflow as tf
-from tensorflow.keras import layers, Model
+"""Construcción de modelo de filtrado colaborativo neuronal (NCF)."""
 
-def create_ncf_model(num_users, num_movies, embedding_size=50):
-    # Entradas de los índices
+import tensorflow as tf
+from tensorflow.keras import layers, models
+
+
+def create_ncf_model(num_users: int, num_movies: int, embedding_size: int = 50) -> models.Model:
+    """Construye y compila un modelo de Filtrado Colaborativo Neuronal (NCF).
+
+    El modelo utiliza dos ramas de embedding (usuario y película), las concatena
+    y pasa el vector resultante a través de una serie de capas densas (MLP) para
+    predecir la calificación.
+
+    Args:
+        num_users (int): Cantidad total de usuarios únicos en el dataset.
+        num_movies (int): Cantidad total de películas únicas en el dataset.
+        embedding_size (int, optional): Dimensión del espacio latente para los
+            embeddings. Por defecto es 50.
+
+    Returns:
+        tensorflow.keras.models.Model: Modelo de Keras compilado con optimizador Adam,
+        función de pérdida de error cuadrático medio (MSE) y métrica MAE.
+    """
+    # Entradas
     user_input = layers.Input(shape=(1,), name='user_input')
     movie_input = layers.Input(shape=(1,), name='movie_input')
 
-    # Capas de Embedding: Transforman un ID en un vector de características latentes
+    # Embeddings
     user_embedding = layers.Embedding(num_users, embedding_size, name='user_emb')(user_input)
     movie_embedding = layers.Embedding(num_movies, embedding_size, name='movie_emb')(movie_input)
 
-    # Aplanamos los vectores
+    # Flatten y concatenación
     user_vec = layers.Flatten()(user_embedding)
     movie_vec = layers.Flatten()(movie_embedding)
-
-    # Concatenación: Aquí es donde la "magia" de la red neuronal ocurre
     concat = layers.Concatenate()([user_vec, movie_vec])
 
-    # Capas Densas (MLP): Aprenden interacciones no lineales entre gustos y películas
+    # Capas densas (MLP)
     dense_1 = layers.Dense(64, activation='relu')(concat)
-    dropout_1 = layers.Dropout(0.2)(dense_1)
-    dense_2 = layers.Dense(32, activation='relu')(dropout_1)
-    
-    # Salida: Sigmoide para predecir la probabilidad de rating alto
+    dense_2 = layers.Dense(32, activation='relu')(dense_1)
     output = layers.Dense(1, activation='sigmoid')(dense_2)
 
-    model = Model(inputs=[user_input, movie_input], outputs=output)
+    model = models.Model(inputs=[user_input, movie_input], outputs=output)
     model.compile(optimizer='adam', loss='mse', metrics=['mae'])
-    
+
     return model
