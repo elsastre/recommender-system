@@ -1,3 +1,5 @@
+![Python CI](https://github.com/elsastre/recommender-system/actions/workflows/python-app.yml/badge.svg)
+
 # 🎬 Neural Collaborative Filtering (NCF) Movie Recommender
 
 A production-ready recommendation system based on **Deep Learning**. This project implements an NCF architecture to predict user preferences and serves them through a scalable **FastAPI** service containerized with **Docker**.
@@ -51,5 +53,22 @@ $$y_{ui} = \sigma(MLP(P^T v_u \oplus Q^T v_i))$$
 
     ```bash
     streamlit run src/app_ui.py 
+
+## 📊 Model Performance
+
+The model was trained for 10 epochs. The best generalization was observed around **Epoch 4**, before the onset of overfitting.
+
+| Metric | Value |
+| :--- | :--- |
+| Training Loss (MSE) | 0.0480 |
+| Validation Loss (MSE) | 0.0540 |
+| Validation MAE | 0.1829 |
+
+$$MAE = \frac{1}{n} \sum_{i=1}^{n} |y_i - \hat{y}_i|$$
+
+*Note: Ratings are normalized to a [0, 1] scale. An MAE of 0.18 on a 5-star scale represents an average error of approximately 0.9 stars.*
+
 Developed by Braihans - AI Engineering Student
+
+
 

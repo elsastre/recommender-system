@@ -38,7 +38,7 @@ def main():
     if not os.path.exists('models'):
         os.makedirs('models')
 
-    model.save('models/recommender_v1.h5')
+    model.save('models/recommender_v1.keras')
     print("Model successfully saved to models/recommender_v1.h5")
 
 if __name__ == "__main__":

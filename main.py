@@ -65,7 +65,7 @@ try:
     logger.info("Starting asset loading for the model...")
 
     # Load the pre-trained model (.h5) in inference mode
-    model = tf.keras.models.load_model('models/recommender_v1.h5', compile=False)
+    model = tf.keras.models.load_model('models/recommender_v1.keras', compile=False)
 
     # Initialize the data processor to retrieve mappings
     from src.preprocess import DataProcessor

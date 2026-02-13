@@ -1,68 +1,60 @@
-"""MovieLens data processing for an NCF recommender system."""
+"""MovieLens data processing module for NCF systems."""
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
+from typing import Tuple, Dict
 
 
 class DataProcessor:
-    """Responsible for the ETL pipeline and preprocessing of MovieLens data.
-
-    Loads the ratings dataset, creates contiguous indices for users and movies,
-    and prepares train/test splits.
+    """
+    Handles the ETL pipeline and preprocessing for the MovieLens dataset.
 
     Attributes:
-        data_path (str): Local path to the ratings file (u.data).
-        user_map (dict): Mapping from internal indices to original user IDs.
-        movie_map (dict): Mapping from internal indices to original movie IDs.
+        data_path (str): Path to the raw u.data file.
+        user_map (Dict): Mapping from internal indices to original user IDs.
+        movie_map (Dict): Mapping from internal indices to original movie IDs.
     """
 
     def __init__(self, data_path: str):
-        """Initialize the processor with the data path.
+        """
+        Initialize the processor.
 
         Args:
-            data_path (str): Path to the MovieLens u.data file.
+            data_path (str): Local path to the ratings file.
         """
         self.data_path = data_path
-        self.user_map = {}
-        self.movie_map = {}
+        self.user_map: Dict = {}
+        self.movie_map: Dict = {}
 
     def load_and_clean(self) -> pd.DataFrame:
-        """Load the dataset, perform basic cleaning and create ID mappings.
-
-        Reads the tab-separated file, assigns column names, converts original
-        identifiers to continuous numeric indices and stores the mappings for
-        later use.
+        """
+        Load dataset and generate contiguous category indices.
 
         Returns:
-            pd.DataFrame: DataFrame with the original columns and two new ones:
-                'user_idx' and 'movie_idx' containing internal indices.
+            pd.DataFrame: Processed dataframe with 'user_idx' and 'movie_idx'.
         """
         names = ['user_id', 'movie_id', 'rating', 'timestamp']
         df = pd.read_csv(self.data_path, sep='\t', names=names)
 
-        # Generate mappings to avoid gaps in neural network indices
+        # Vectorized category encoding
         df['user_idx'] = df['user_id'].astype('category').cat.codes
         df['movie_idx'] = df['movie_id'].astype('category').cat.codes
 
-        # Save mappings for inverse lookup during inference
+        # Store mappings for inference lookup
         self.user_map = dict(enumerate(df['user_id'].astype('category').cat.categories))
         self.movie_map = dict(enumerate(df['movie_id'].astype('category').cat.categories))
 
         return df
 
-    def get_train_test(self, df: pd.DataFrame):
-        """Split the dataframe into training and testing sets.
-
-        Extracts features (user_idx, movie_idx) and the target variable
-        (normalized rating). Performs a simple train/test split.
+    def get_train_test(self, df: pd.DataFrame) -> Tuple:
+        """
+        Split data into training and testing sets with normalized targets.
 
         Args:
-            df (pd.DataFrame): DataFrame processed by `load_and_clean`.
+            df (pd.DataFrame): Dataframe from load_and_clean().
 
         Returns:
-            tuple: Contains (X_train, X_test, y_train, y_test) where:
-                - X_train, X_test: arrays with pairs [user_idx, movie_idx].
-                - y_train, y_test: arrays with normalized ratings in [0,1].
+            Tuple: (X_train, X_test, y_train, y_test)
         """
         X = df[['user_idx', 'movie_idx']].values
         y = (df['rating'].values - 1) / 4.0  # Normalización 0-1

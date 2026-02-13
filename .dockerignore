@@ -1,20 +1,37 @@
-# Virtual environment
+# Virtual environments
 venv/
 env/
 .env/
+.venv/
 
-# Python bytecode files
+# Python bytecode & cache
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.ipynb_checkpoints/
 
-# Git
+# Metadata & Documentation
 .git/
 .gitignore
+.github/
+docs/
+*.md
 
-# Docker
-Dockerfile
-docker-compose.yml
-
-# MovieLens data
+# Heavy Data & Artifacts
+# Ignoramos la data y modelos locales porque los montamos por volumen o son pesados
 data/*.data
 data/*.item
+data/*.zip
+models/*.h5
+models/*.keras
+
+# Docker stuff
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# IDEs
+.vscode/
+.idea/
