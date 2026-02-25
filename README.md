@@ -59,7 +59,7 @@ docker run --name recommender-service -p 8000:8000 -v "$(pwd)/data:/app/data" -v
 Open a **new terminal** and run:
 ```bash
 pip install streamlit
-streamlit run src/app_ui.py
+python -m streamlit run src/app_ui.py
 ```
 The UI will open at `http://localhost:8501` and connect to the running API.
 
