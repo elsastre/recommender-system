@@ -34,7 +34,14 @@ class DataProcessor:
             pd.DataFrame: Processed dataframe with 'user_idx' and 'movie_idx'.
         """
         names = ['user_id', 'movie_id', 'rating', 'timestamp']
-        df = pd.read_csv(self.data_path, sep='\t', names=names)
+        
+        df = pd.read_csv(
+            self.data_path, 
+            sep='::', 
+            engine='python',
+            names=['user_id', 'movie_id', 'rating', 'timestamp'],
+            encoding='latin-1'
+        )
 
         # Vectorized category encoding
         df['user_idx'] = df['user_id'].astype('category').cat.codes

@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  # 1. El Backend (FastAPI + Modelo)
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aiflix-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+    environment:
+      - TMDB_API_KEY=${TMDB_API_KEY} 
+    restart: unless-stopped
+
+  # 2. El Frontend (Streamlit)
+  ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.ui
+    container_name: aiflix-ui
+    ports:
+      - "8501:8501"
+    environment:
+      - API_URL=http://api:8000
+    depends_on:
+      - api 
+    restart: unless-stopped

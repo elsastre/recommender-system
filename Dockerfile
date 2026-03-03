@@ -2,7 +2,7 @@
 # Builds an image with Python 3.12, installs dependencies, and runs the FastAPI API.
 
 # Use a lightweight Python 3.12 image
-FROM python:3.12-slim
+FROM tensorflow/tensorflow:2.18.0-gpu
 
 # Set the working directory inside the container
 WORKDIR /app

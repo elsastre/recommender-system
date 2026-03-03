@@ -59,13 +59,17 @@ def create_ncf_model(
     concat = layers.Concatenate(name='interaction_layer')([user_vec, movie_vec])
 
     # --- Multi-Layer Perceptron (MLP) ---
-    # Dense layers with ReLU to capture complex patterns
+    # Dense layers with ReLU to capture complex patterns.
+    # Dropout is applied to prevent overfitting during training.
     dense_1 = layers.Dense(64, activation='relu', name='fully_connected_1')(concat)
-    dense_2 = layers.Dense(32, activation='relu', name='fully_connected_2')(dense_1)
+    dropout_1 = layers.Dropout(0.2, name='dropout_1')(dense_1)
+    
+    dense_2 = layers.Dense(32, activation='relu', name='fully_connected_2')(dropout_1)
+    dropout_2 = layers.Dropout(0.2, name='dropout_2')(dense_2)
 
     # --- Output Layer ---
     # Sigmoid activation to output a probability/score between 0 and 1
-    output = layers.Dense(1, activation='sigmoid', name='prediction')(dense_2)
+    output = layers.Dense(1, activation='sigmoid', name='prediction')(dropout_2)
 
     # --- Model Compilation ---
     model = models.Model(inputs=[user_input, movie_input], outputs=output)
