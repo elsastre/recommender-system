@@ -51,3 +51,35 @@ The entire infrastructure is orchestrated via Docker Compose, making deployment 
 ```bash
 git clone [https://github.com/elsastre/recommender-system.git](https://github.com/elsastre/recommender-system.git)
 cd recommender-system
+```
+
+2. Create a `.env` file in the root directory and add your TMDB key:
+```env
+TMDB_API_KEY=your_api_key_here
+```
+
+3. Spin up the microservices:
+```bash
+docker-compose up --build -d
+```
+
+### Accessing the Services
+* **Streamlit Dashboard**: `http://localhost:8501`
+* **FastAPI Interactive Docs (Swagger UI)**: `http://localhost:8000/docs`
+
+## 📊 Model Performance
+
+The model generalizes effectively on the MovieLens 100k dataset. The best generalization was observed around **Epoch 4**.
+
+| Metric | Value |
+| :--- | :--- |
+| Training Loss (MSE) | 0.0480 |
+| Validation Loss (MSE) | 0.0540 |
+| Validation MAE | 0.1829 |
+
+$$MAE = \frac{1}{n} \sum_{i=1}^{n} |y_i - \hat{y}_i|$$
+
+*Note: Ratings are normalized to a [0, 1] scale. An MAE of 0.18 represents an average error of approximately 0.9 stars on a standard 5-star scale.*
+
+---
+*Developed by Braihans - AI Engineering Student*
