@@ -1,4 +1,4 @@
-# 🎬 AIFlix: Neural Collaborative Filtering (NCF) Recommender
+# 🎬 Neural Collaborative Filtering (NCF) Recommender
 
 ![Python CI](https://github.com/elsastre/recommender-system/actions/workflows/python-app.yml/badge.svg)
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
