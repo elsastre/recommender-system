@@ -6,14 +6,7 @@ venv/
 # Python
 __pycache__/
 *.pyc
-
-# Heavy data and models
-data/*.dat
-data/*.data
-data/*.item
-models/*.keras
-models/*.h5
-models/*.json
+.pytest_cache/
 
 # VS Code and System
 .vscode/

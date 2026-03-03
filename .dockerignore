@@ -19,14 +19,6 @@ __pycache__/
 docs/
 *.md
 
-# Heavy Data & Artifacts
-# Ignoramos la data y modelos locales porque los montamos por volumen o son pesados
-data/*.data
-data/*.item
-data/*.zip
-models/*.h5
-models/*.keras
-
 # Docker stuff
 Dockerfile
 docker-compose.yml
