@@ -96,14 +96,19 @@ def load_assets():
         # Load the pre-trained model
         model = tf.keras.models.load_model('models/recommender_v1.keras', compile=False)
 
-        # Initialize the data processor to retrieve mappings
+        # Initialize the data processor to retrieve mappings (V2 Dataset)
         from src.preprocess import DataProcessor
-        processor = DataProcessor('data/u.data')
+        processor = DataProcessor('data/ratings.dat')
         df = processor.load_and_clean()
 
         # Load and map movie metadata (titles)
-        cols = ['movie_id', 'title'] + [f'extra_{i}' for i in range(22)]
-        items = pd.read_csv('data/u.item', sep='|', names=cols, encoding='latin-1')
+        items = pd.read_csv(
+            'data/movies.dat', 
+            sep='::', 
+            engine='python',
+            names=['movie_id', 'title', 'genres'], 
+            encoding='latin-1'
+        )
         movie_titles = dict(zip(items['movie_id'], items['title']))
 
         # --- COLD START PREPARATION ---
@@ -118,7 +123,6 @@ def load_assets():
         # --- EMBEDDINGS EXTRACTION (For Item-to-Item Similarity) ---
         logger.info("Extracting movie embeddings from the neural network...")
         
-        # We dynamically search for the movie embedding layer by shape or name
         for layer in model.layers:
             if isinstance(layer, tf.keras.layers.Embedding) and layer.input_dim == len(processor.movie_map):
                 movie_embed_weights = layer.get_weights()[0]
