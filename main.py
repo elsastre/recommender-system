@@ -72,65 +72,75 @@ app = FastAPI(
     version="2.0.0"
 )
 
-# --- ASSET LOADING ---
+# Variables globales vacías para llenarlas después
+model = None
+df = None
+movie_titles = None
+processor = None
+TOP_GLOBAL_MOVIES = []
+movie_embed_weights = None
+items = None
 
-try:
-    logger.info("Starting asset loading for the model...")
-    os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
-
-    # Load the pre-trained model
-    model = tf.keras.models.load_model('models/recommender_v1.keras', compile=False)
-
-    # Initialize the data processor to retrieve mappings (1M dataset)
-    processor = DataProcessor('data/ratings.dat') 
-    df = processor.load_and_clean()
-
-    # Load and map movie metadata (titles)
-    items = pd.read_csv(
-        'data/movies.dat', 
-        sep='::', 
-        engine='python',
-        names=['movie_id', 'title', 'genres'], 
-        encoding='latin-1'
-    )
-    movie_titles = dict(zip(items['movie_id'], items['title']))
-
-    # --- COLD START PREPARATION ---
-    logger.info("Calculating global top movies for Cold Start...")
-    movie_stats = df.groupby('movie_id').agg(
-        avg_rating=('rating', 'mean'),
-        num_ratings=('rating', 'count')
-    ).reset_index()
-    top_global_df = movie_stats[movie_stats['num_ratings'] > 1000].sort_values(by='avg_rating', ascending=False)
-    TOP_GLOBAL_MOVIES = top_global_df.head(50)['movie_id'].tolist()
-
-    # --- EMBEDDINGS EXTRACTION (For Item-to-Item Similarity) ---
-    logger.info("Extracting movie embeddings from the neural network...")
-    movie_embed_weights = None
+@app.on_event("startup")
+def load_assets():
+    """Esta función se ejecuta DESPUÉS de abrir el puerto."""
+    global model, df, movie_titles, processor, TOP_GLOBAL_MOVIES, movie_embed_weights, items
     
-    # We dynamically search for the movie embedding layer by shape or name
-    for layer in model.layers:
-        if isinstance(layer, tf.keras.layers.Embedding) and layer.input_dim == len(processor.movie_map):
-            movie_embed_weights = layer.get_weights()[0]
-            break
-            
-    if movie_embed_weights is None:
+    try:
+        logger.info("Starting asset loading for the model...")
+        
+        # Apagamos los warnings molestos de CUDA en consola
+        import os
+        os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
+
+        # Load the pre-trained model
+        model = tf.keras.models.load_model('models/recommender_v1.keras', compile=False)
+
+        # Initialize the data processor to retrieve mappings
+        from src.preprocess import DataProcessor
+        processor = DataProcessor('data/u.data')
+        df = processor.load_and_clean()
+
+        # Load and map movie metadata (titles)
+        cols = ['movie_id', 'title'] + [f'extra_{i}' for i in range(22)]
+        items = pd.read_csv('data/u.item', sep='|', names=cols, encoding='latin-1')
+        movie_titles = dict(zip(items['movie_id'], items['title']))
+
+        # --- COLD START PREPARATION ---
+        logger.info("Calculating global top movies for Cold Start...")
+        movie_stats = df.groupby('movie_id').agg(
+            avg_rating=('rating', 'mean'),
+            num_ratings=('rating', 'count')
+        ).reset_index()
+        top_global_df = movie_stats[movie_stats['num_ratings'] > 1000].sort_values(by='avg_rating', ascending=False)
+        TOP_GLOBAL_MOVIES = top_global_df.head(50)['movie_id'].tolist()
+
+        # --- EMBEDDINGS EXTRACTION (For Item-to-Item Similarity) ---
+        logger.info("Extracting movie embeddings from the neural network...")
+        
+        # We dynamically search for the movie embedding layer by shape or name
         for layer in model.layers:
-            if 'movie' in layer.name.lower() and 'embed' in layer.name.lower():
+            if isinstance(layer, tf.keras.layers.Embedding) and layer.input_dim == len(processor.movie_map):
                 movie_embed_weights = layer.get_weights()[0]
                 break
+                
+        if movie_embed_weights is None:
+            for layer in model.layers:
+                if 'movie' in layer.name.lower() and 'embed' in layer.name.lower():
+                    movie_embed_weights = layer.get_weights()[0]
+                    break
 
-    if movie_embed_weights is not None:
-        logger.info(f"Embeddings extracted successfully. Matrix shape: {movie_embed_weights.shape}")
-    else:
-        logger.warning("Could not automatically extract embeddings. Similarity endpoint may fail.")
+        if movie_embed_weights is not None:
+            logger.info(f"Embeddings extracted successfully. Matrix shape: {movie_embed_weights.shape}")
+        else:
+            logger.warning("Could not automatically extract embeddings. Similarity endpoint may fail.")
 
-    logger.info("Asset loading completed successfully.")
-
-except Exception as e:
-    logger.error(f"Critical error during initialization: {e}")
-    raise e
-
+        logger.info("Asset loading completed successfully.")
+        
+    except Exception as e:
+        logger.error(f"Critical error during initialization: {e}")
+        raise e
+    
 # --- ENDPOINTS ---
 
 @app.get("/", tags=["Health Check"])
