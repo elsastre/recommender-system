@@ -2,7 +2,7 @@
 # Builds an image with Python 3.12, installs dependencies, and runs the FastAPI API.
 
 # Use a lightweight Python 3.12 image
-FROM tensorflow/tensorflow:2.18.0
+FROM tensorflow/tensorflow:2.18.0-gpu
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -19,8 +19,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the project code
 COPY . .
 
-# Forzamos a TensorFlow a usar solo CPU para que no pierda tiempo buscando drivers
-ENV CUDA_VISIBLE_DEVICES="-1"
+# Expose the port used by FastAPI
+EXPOSE 8000
 
-# Usamos el formato shell para que Render pueda inyectar su propio puerto dinámico
-CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}
+# Command to start the API when the container starts
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

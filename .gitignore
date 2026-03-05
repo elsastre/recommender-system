@@ -11,3 +11,11 @@ __pycache__/
 # VS Code and System
 .vscode/
 .DS_Store
+
+# Heavy data and models
+data/*.dat
+data/*.data
+data/*.item
+models/*.keras
+models/*.h5
+models/*.json

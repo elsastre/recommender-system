@@ -27,3 +27,11 @@ docker-compose.yml
 # IDEs
 .vscode/
 .idea/
+
+# Heavy Data & Artifacts
+data/*.dat
+data/*.data
+data/*.item
+models/*.h5
+models/*.keras
+models/*.json
